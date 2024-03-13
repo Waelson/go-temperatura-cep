@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Waelson/go-temperatura-cep/internal/controller"
+	"github.com/Waelson/go-temperatura-cep/internal/model"
 	"github.com/Waelson/go-temperatura-cep/internal/requester"
 	"github.com/Waelson/go-temperatura-cep/internal/service"
 	"log"
@@ -13,7 +14,8 @@ func main() {
 	fmt.Println("Iniciando aplicacao")
 
 	httpRequest := requester.NewHttpRequest()
-	integrationService := service.NewIntegrationService(httpRequest)
+	urls := model.NewModel()
+	integrationService := service.NewIntegrationService(httpRequest, urls)
 	applicationService := service.NewApplicationService(integrationService)
 	applicationController := controller.NewApplicationController(applicationService)
 

@@ -2,25 +2,33 @@ package model
 
 import "fmt"
 
-const CepUrl = "https://viacep.com.br/ws/%s/json/"
-const TemperaturaUrl = "http://api.weatherapi.com/v1/current.json?key=91aae757610f44a0b7f104938241203&q=%s&aqi=no"
+const cepUrl = "https://viacep.com.br/ws/%s/json/"
+const temperaturaUrl = "http://api.weatherapi.com/v1/current.json?key=91aae757610f44a0b7f104938241203&q=%s&aqi=no"
 
-type Url struct {
+type Url interface {
+	GetCep(cep string) string
+	GetTemperatura(cidade string) string
 }
 
-func (u *Url) GetCep(cep string) string {
-	return fmt.Sprintf(CepUrl, cep)
+type url struct {
 }
 
-func (u *Url) GetTemperatura(cidade string) string {
-	return fmt.Sprintf(TemperaturaUrl, cidade)
+func (u *url) GetCep(cep string) string {
+	return fmt.Sprintf(cepUrl, cep)
+}
+
+func (u *url) GetTemperatura(cidade string) string {
+	return fmt.Sprintf(temperaturaUrl, cidade)
+}
+
+func NewModel() Url {
+	return &url{}
 }
 
 type ApplicationResponse struct {
-	UserID    int    `json:"userId"`
-	ID        int    `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	TempC float64 `json:"temp_C"`
+	TempF float64 `json:"temp_F"`
+	TempK float64 `json:"temp_K"`
 }
 
 type CepResponse struct {
@@ -34,6 +42,7 @@ type CepResponse struct {
 	Gia         string `json:"gia"`
 	Ddd         string `json:"ddd"`
 	Siafi       string `json:"siafi"`
+	Error       bool   `json:"erro"`
 }
 
 type TemperaturaResponse struct {
