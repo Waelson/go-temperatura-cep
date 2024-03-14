@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/Waelson/go-temperatura-cep/internal/model"
+	"strconv"
 	"strings"
 )
 
@@ -16,12 +17,12 @@ type applicationService struct {
 
 func (s *applicationService) GetTemperature(cep string) (model.ApplicationResponse, error) {
 	fmt.Println(fmt.Sprintf("Vamos pesquisar o CEP %s", cep))
-
-	if strings.TrimSpace(cep) == "" {
+	cep = strings.TrimSpace(cep)
+	if cep == "" || len(cep) != 8 || !isNumber(cep) {
 		return model.ApplicationResponse{}, model.InvalidCepError
 	}
 
-	cepResponse, err := s.integrationService.GetCep(strings.TrimSpace(cep))
+	cepResponse, err := s.integrationService.GetCep(cep)
 	if err != nil {
 		return model.ApplicationResponse{}, err
 	}
@@ -39,6 +40,11 @@ func (s *applicationService) GetTemperature(cep string) (model.ApplicationRespon
 		TempF: tempF,
 		TempK: tempK,
 	}, nil
+}
+
+func isNumber(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }
 
 func NewApplicationService(service IntegrationService) ApplicationService {

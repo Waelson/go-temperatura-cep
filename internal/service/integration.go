@@ -20,6 +20,11 @@ type integrationService struct {
 
 func (s *integrationService) GetCep(cep string) (model.CepResponse, error) {
 	fmt.Println(fmt.Sprintf("Pesquisando CEP %s", cep))
+	cep, err := s.httpRequest.Normalize(cep)
+	if err != nil {
+		return model.CepResponse{}, model.InternalError
+	}
+
 	res, status, err := s.httpRequest.MakeRequest(s.urls.GetCep(cep))
 
 	if status == http.StatusBadRequest {
@@ -48,6 +53,11 @@ func (s *integrationService) GetCep(cep string) (model.CepResponse, error) {
 
 func (s *integrationService) GetTemperatura(cidade string) (model.TemperaturaResponse, error) {
 	fmt.Println(fmt.Sprintf("Pesquisando Temperatura %s", cidade))
+	cidade, err := s.httpRequest.Normalize(cidade)
+	if err != nil {
+		return model.TemperaturaResponse{}, model.InternalError
+	}
+
 	res, status, err := s.httpRequest.MakeRequest(s.urls.GetTemperatura(cidade))
 
 	if status != http.StatusOK {

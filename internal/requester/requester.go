@@ -5,16 +5,28 @@ import (
 	"github.com/Waelson/go-temperatura-cep/internal/model"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type HttpRequest interface {
 	MakeRequest(url string) (string, int, error)
+	Normalize(str string) (string, error)
 }
 
 type httpRequest struct{}
 
-func (h *httpRequest) MakeRequest(url string) (string, int, error) {
-	resp, err := http.Get(url)
+func (h *httpRequest) Normalize(str string) (string, error) {
+	parsedURL, err := url.Parse(str)
+	if err != nil {
+		return "", err
+	}
+	parsedURL.RawQuery = url.QueryEscape(parsedURL.Query().Encode())
+	return parsedURL.String(), nil
+}
+
+func (h *httpRequest) MakeRequest(urlStr string) (string, int, error) {
+
+	resp, err := http.Get(urlStr)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
