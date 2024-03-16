@@ -60,6 +60,10 @@ func (s *integrationService) GetTemperatura(cidade string) (model.TemperaturaRes
 
 	res, status, err := s.httpRequest.MakeRequest(s.urls.GetTemperatura(cidade))
 
+	if status == http.StatusNotFound {
+		return model.TemperaturaResponse{}, model.CepNotFoundError
+	}
+
 	if status != http.StatusOK {
 		return model.TemperaturaResponse{}, model.InternalError
 	}

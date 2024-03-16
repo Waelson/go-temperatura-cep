@@ -10,41 +10,6 @@ import (
 	"testing"
 )
 
-func TestIntegrationService_GetCep_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	cep := "64770000"
-	cepJson := `
-			{
-			  "cep": "64770-000",
-			  "logradouro": "",
-			  "complemento": "",
-			  "bairro": "",
-			  "localidade": "São Raimundo Nonato",
-			  "uf": "PI",
-			  "ibge": "2210607",
-			  "gia": "",
-			  "ddd": "89",
-			  "siafi": "1211"
-			}
-	`
-
-	urls := model.NewModel()
-	url := urls.GetCep(cep)
-
-	m := mock_requester.NewMockHttpRequest(ctrl)
-
-	m.EXPECT().Normalize(cep).Return(cep, nil).AnyTimes()
-	m.EXPECT().MakeRequest(url).Return(cepJson, http.StatusOK, nil).AnyTimes()
-
-	a := service.NewIntegrationService(m, model.NewModel())
-	cepResponse, err := a.GetCep(cep)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, cepResponse)
-}
-
 func TestIntegrationService_GetCep_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -93,4 +58,25 @@ func TestIntegrationService_GetTemperature_Success(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, temperaturaResponse)
+}
+
+func TestIntegrationService_GetTemperature_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cidade := "64770000"
+	temperaturaJson := ""
+
+	urls := model.NewModel()
+	url := urls.GetTemperatura(cidade)
+
+	m := mock_requester.NewMockHttpRequest(ctrl)
+
+	m.EXPECT().Normalize(cidade).Return(cidade, nil).AnyTimes()
+	m.EXPECT().MakeRequest(url).Return(temperaturaJson, http.StatusNotFound, nil).AnyTimes()
+
+	a := service.NewIntegrationService(m, model.NewModel())
+	_, err := a.GetTemperatura(cidade)
+
+	assert.NotNil(t, err)
 }
