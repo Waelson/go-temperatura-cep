@@ -43,3 +43,69 @@ func TestApplicationController_GetTemperature_Success(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, string(data), expectedResponse)
 }
+
+func TestApplicationController_GetTemperature_Error422(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	invalidCep := "6477000"
+	url := fmt.Sprintf("/?cep=%s", invalidCep)
+
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	w := httptest.NewRecorder()
+
+	mock := mock_service.NewMockApplicationService(ctrl)
+	mock.EXPECT().GetTemperature(invalidCep).Return(model.ApplicationResponse{}, model.InvalidCepError).AnyTimes()
+
+	c := controller.NewApplicationController(mock)
+	c.Handler(w, req)
+	res := w.Result()
+
+	defer res.Body.Close()
+
+	assert.Equal(t, res.StatusCode, http.StatusUnprocessableEntity)
+}
+
+func TestApplicationController_GetTemperature_Error404(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	invalidCep := "00000000"
+	url := fmt.Sprintf("/?cep=%s", invalidCep)
+
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	w := httptest.NewRecorder()
+
+	mock := mock_service.NewMockApplicationService(ctrl)
+	mock.EXPECT().GetTemperature(invalidCep).Return(model.ApplicationResponse{}, model.CepNotFoundError).AnyTimes()
+
+	c := controller.NewApplicationController(mock)
+	c.Handler(w, req)
+	res := w.Result()
+
+	defer res.Body.Close()
+
+	assert.Equal(t, res.StatusCode, http.StatusNotFound)
+}
+
+func TestApplicationController_GetTemperature_Error500(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cep := "64770000"
+	url := fmt.Sprintf("/?cep=%s", cep)
+
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	w := httptest.NewRecorder()
+
+	mock := mock_service.NewMockApplicationService(ctrl)
+	mock.EXPECT().GetTemperature(cep).Return(model.ApplicationResponse{}, model.InternalError).AnyTimes()
+
+	c := controller.NewApplicationController(mock)
+	c.Handler(w, req)
+	res := w.Result()
+
+	defer res.Body.Close()
+
+	assert.Equal(t, res.StatusCode, http.StatusInternalServerError)
+}
